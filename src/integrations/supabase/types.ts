@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      products: {
+        Row: {
+          category: string
+          colors: string[] | null
+          created_at: string
+          description: string | null
+          featured: boolean
+          id: string
+          image_url: string | null
+          images: string[] | null
+          in_stock: boolean
+          name: string
+          original_price: number | null
+          price: number
+          sizes: string[] | null
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          colors?: string[] | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          image_url?: string | null
+          images?: string[] | null
+          in_stock?: boolean
+          name: string
+          original_price?: number | null
+          price: number
+          sizes?: string[] | null
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          colors?: string[] | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          image_url?: string | null
+          images?: string[] | null
+          in_stock?: boolean
+          name?: string
+          original_price?: number | null
+          price?: number
+          sizes?: string[] | null
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
