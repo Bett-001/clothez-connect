@@ -21,7 +21,7 @@ export function Footer() {
               Kenya's premier marketplace for verified clothing stores. Shop with confidence from the best fashion vendors.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
+              <a href="https://www.instagram.com/clotzhub/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
               <a href="#" className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
