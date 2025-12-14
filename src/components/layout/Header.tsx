@@ -1,14 +1,24 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, Menu, X, User, Search, Store } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ShoppingBag, Menu, X, User, Search, Store, LogOut, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { itemCount } = useCart();
+  const { user, loading, signOut } = useAuth();
 
   const navLinks = [
     { href: '/', label: 'Home' },
@@ -17,6 +27,11 @@ export function Header() {
   ];
 
   const isActive = (href: string) => location.pathname === href;
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
@@ -66,12 +81,37 @@ export function Header() {
               </Button>
             </Link>
 
-            <Link to="/auth" className="hidden md:block">
-              <Button variant="gold-outline" size="sm">
-                <User className="w-4 h-4" />
-                Sign In
+            {loading ? (
+              <Button variant="ghost" size="icon" disabled>
+                <Loader2 className="w-4 h-4 animate-spin" />
               </Button>
-            </Link>
+            ) : user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="gold-outline" size="sm" className="hidden md:flex">
+                    <User className="w-4 h-4" />
+                    {user.user_metadata?.full_name?.split(' ')[0] || 'Account'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem className="text-muted-foreground text-xs">
+                    {user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth" className="hidden md:block">
+                <Button variant="gold-outline" size="sm">
+                  <User className="w-4 h-4" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
 
             {/* Mobile Menu Toggle */}
             <Button
@@ -103,12 +143,32 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
-            <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-              <Button variant="gold" className="w-full mt-4">
-                <User className="w-4 h-4" />
-                Sign In / Register
-              </Button>
-            </Link>
+            
+            {user ? (
+              <>
+                <div className="py-2 text-sm text-muted-foreground">
+                  Signed in as {user.email}
+                </div>
+                <Button 
+                  variant="destructive" 
+                  className="w-full mt-4" 
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                <Button variant="gold" className="w-full mt-4">
+                  <User className="w-4 h-4" />
+                  Sign In / Register
+                </Button>
+              </Link>
+            )}
           </nav>
         </div>
       )}
