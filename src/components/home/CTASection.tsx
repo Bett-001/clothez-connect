@@ -47,7 +47,7 @@ export function CTASection() {
               </ul>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link to="/auth?mode=store">
+                <Link to="/register-store">
                   <Button variant="hero" size="lg">
                     Register Your Store
                     <span className="ml-2">→</span>
