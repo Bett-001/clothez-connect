@@ -118,6 +118,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_public_stores: {
+        Args: never
+        Returns: {
+          banner_url: string
+          created_at: string
+          description: string
+          id: string
+          location: string
+          logo_url: string
+          name: string
+          status: Database["public"]["Enums"]["store_status"]
+          updated_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
