@@ -1,5 +1,6 @@
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { InstallBanner } from '@/components/InstallApp';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </main>
       <Footer />
+      <InstallBanner />
     </div>
   );
 }

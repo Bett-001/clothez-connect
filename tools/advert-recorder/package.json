@@ -1,0 +1,9 @@
+{
+  "name": "clotzhub-advert-recorder",
+  "private": true,
+  "type": "module",
+  "description": "Records the live Clotz Hub app into 4K advert videos (not part of the web app build).",
+  "dependencies": {
+    "puppeteer-core": "23.11.1"
+  }
+}

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { InstallAppButton } from '@/components/InstallApp';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import {
@@ -111,6 +112,8 @@ export function Header() {
               </Button>
             )}
 
+            <InstallAppButton className="hidden md:flex" />
+
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative" aria-label="Cart">
                 <ShoppingBag className="w-5 h-5" />
@@ -177,6 +180,7 @@ export function Header() {
               <Input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search products..." />
               <Button type="submit" variant="gold" size="icon" aria-label="Search"><Search className="w-4 h-4" /></Button>
             </form>
+            <InstallAppButton full className="mb-1" onDone={() => setIsMenuOpen(false)} />
             {navLinks.map(link => (
               <Link
                 key={link.href}
