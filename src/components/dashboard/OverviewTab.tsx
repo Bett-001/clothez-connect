@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { OrderStatusBadge } from '@/components/shared/StatusBadge';
 import { formatDate, formatKES, type StoreRow } from '@/lib/marketplace';
 import { useStoreOrders } from './OrdersTab';
+import { ImaraSuggestion } from './ImaraSuggestion';
 
 export function OverviewTab({ store, onOpenTab }: { store: StoreRow; onOpenTab: (tab: string) => void }) {
   const { data: orders } = useStoreOrders(store.id);
@@ -94,6 +95,8 @@ export function OverviewTab({ store, onOpenTab }: { store: StoreRow; onOpenTab: 
           )}
         </div>
       </div>
+
+      {store.sells_on_whatsapp && <ImaraSuggestion />}
     </div>
   );
 }

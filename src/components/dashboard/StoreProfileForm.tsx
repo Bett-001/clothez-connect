@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SingleImageUpload } from '@/components/shared/ImageUpload';
+import { ImaraSuggestion } from './ImaraSuggestion';
 import { CATEGORIES, type StoreRow } from '@/lib/marketplace';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +37,8 @@ export const storeProfileSchema = z
     mpesa_paybill: optional(z.string().trim().regex(/^\d{5,7}$/, 'Paybill numbers are 5 to 7 digits')),
     mpesa_account: z.string().trim().max(30),
     accepts_cash: z.boolean(),
+    sells_on_whatsapp: z.boolean(),
+    wants_mpesa_prompt: z.boolean(),
   })
   .refine(v => v.offers_delivery || v.offers_pickup, {
     message: 'Offer at least delivery or pickup',
@@ -72,6 +75,8 @@ export const emptyStoreProfile: StoreProfileValues = {
   mpesa_paybill: '',
   mpesa_account: '',
   accepts_cash: true,
+  sells_on_whatsapp: false,
+  wants_mpesa_prompt: false,
 };
 
 export function storeRowToValues(s: StoreRow): StoreProfileValues {
@@ -99,6 +104,8 @@ export function storeRowToValues(s: StoreRow): StoreProfileValues {
     mpesa_paybill: s.mpesa_paybill ?? '',
     mpesa_account: s.mpesa_account ?? '',
     accepts_cash: s.accepts_cash,
+    sells_on_whatsapp: s.sells_on_whatsapp ?? false,
+    wants_mpesa_prompt: s.wants_mpesa_prompt ?? false,
   };
 }
 
@@ -129,6 +136,8 @@ export function valuesToStoreColumns(v: StoreProfileValues) {
     mpesa_paybill: blank(v.mpesa_paybill),
     mpesa_account: blank(v.mpesa_account),
     accepts_cash: v.accepts_cash,
+    sells_on_whatsapp: v.sells_on_whatsapp,
+    wants_mpesa_prompt: v.wants_mpesa_prompt,
   };
 }
 
@@ -300,6 +309,26 @@ export function StoreProfileFields({
           Accept cash on delivery or pickup
         </label>
         {errors.accepts_cash && <p className="text-destructive text-sm">{errors.accepts_cash}</p>}
+      </Section>
+
+      <Section title="Two quick questions" hint="Your answers help us suggest tools and decide what to build next. Only you and Clotz Hub admins see them.">
+        <label className="flex items-start gap-3">
+          <Switch className="mt-0.5" checked={values.sells_on_whatsapp} onCheckedChange={v => set('sells_on_whatsapp', v)} />
+          <span>
+            <span className="font-medium block">Do you get a lot of orders or questions on WhatsApp?</span>
+            <span className="text-sm text-muted-foreground">Turn this on and we'll suggest a tool that makes WhatsApp selling easier.</span>
+          </span>
+        </label>
+        {values.sells_on_whatsapp && <ImaraSuggestion />}
+        <label className="flex items-start gap-3">
+          <Switch className="mt-0.5" checked={values.wants_mpesa_prompt} onCheckedChange={v => set('wants_mpesa_prompt', v)} />
+          <span>
+            <span className="font-medium block">Would you like shoppers to pay with an M-Pesa prompt on their phone?</span>
+            <span className="text-sm text-muted-foreground">
+              Shoppers would tap Pay and confirm with their M-Pesa PIN, with no codes to type. It's not available yet. Say yes and we'll let you know when it is.
+            </span>
+          </span>
+        </label>
       </Section>
     </div>
   );

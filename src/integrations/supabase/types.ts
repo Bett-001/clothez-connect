@@ -317,6 +317,8 @@ export type Database = {
           id: string
           instagram: string | null
           is_featured: boolean
+          sells_on_whatsapp: boolean
+          wants_mpesa_prompt: boolean
           location: string | null
           logo_url: string | null
           map_url: string | null
@@ -349,6 +351,8 @@ export type Database = {
           id?: string
           instagram?: string | null
           is_featured?: boolean
+          sells_on_whatsapp?: boolean
+          wants_mpesa_prompt?: boolean
           location?: string | null
           logo_url?: string | null
           map_url?: string | null
@@ -381,6 +385,8 @@ export type Database = {
           id?: string
           instagram?: string | null
           is_featured?: boolean
+          sells_on_whatsapp?: boolean
+          wants_mpesa_prompt?: boolean
           location?: string | null
           logo_url?: string | null
           map_url?: string | null

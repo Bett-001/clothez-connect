@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { Store, CheckCircle, XCircle, Clock, Loader2, AlertTriangle, Star } from 'lucide-react';
+import { Store, CheckCircle, XCircle, Clock, Loader2, AlertTriangle, Star, MessageCircle, Smartphone } from 'lucide-react';
 import { categoryName } from '@/lib/marketplace';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,8 @@ interface StoreApplication {
   categories: string[];
   whatsapp: string | null;
   is_featured: boolean;
+  sells_on_whatsapp?: boolean;
+  wants_mpesa_prompt?: boolean;
   phone: string | null;
   email: string | null;
   status: 'pending' | 'approved' | 'rejected';
@@ -51,6 +54,16 @@ export default function AdminDashboard() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
 
+  const { data: summary, refetch: refetchSummary } = useQuery({
+    queryKey: ['admin-store-summary'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('stores').select('status, sells_on_whatsapp, wants_mpesa_prompt');
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAdmin,
+  });
+
   useEffect(() => {
     if (!authLoading && !roleLoading) {
       if (!user) {
@@ -69,6 +82,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (isAdmin) {
       fetchStores();
+      refetchSummary();
     }
   }, [isAdmin, filter]);
 
@@ -120,6 +134,7 @@ export default function AdminDashboard() {
         description: `${store.name} has been approved and is now live.`,
       });
       fetchStores();
+      refetchSummary();
     }
     
     setActionLoading(false);
@@ -132,6 +147,7 @@ export default function AdminDashboard() {
     } else {
       toast({ title: store.is_featured ? 'Removed from featured' : 'Store featured on the homepage' });
       fetchStores();
+      refetchSummary();
     }
   };
 
@@ -163,6 +179,7 @@ export default function AdminDashboard() {
       setSelectedStore(null);
       setRejectionReason('');
       fetchStores();
+      refetchSummary();
     }
     
     setActionLoading(false);
@@ -182,11 +199,14 @@ export default function AdminDashboard() {
     return null;
   }
 
+  const all = summary ?? [];
   const statusCounts = {
-    pending: stores.filter(s => s.status === 'pending').length,
-    approved: stores.filter(s => s.status === 'approved').length,
-    rejected: stores.filter(s => s.status === 'rejected').length,
+    pending: all.filter(s => s.status === 'pending').length,
+    approved: all.filter(s => s.status === 'approved').length,
+    rejected: all.filter(s => s.status === 'rejected').length,
   };
+  const wantPrompt = all.filter(s => s.wants_mpesa_prompt).length;
+  const onWhatsapp = all.filter(s => s.sells_on_whatsapp).length;
 
   return (
     <Layout>
@@ -229,6 +249,24 @@ export default function AdminDashboard() {
                 <p className="text-2xl font-bold">{statusCounts.rejected}</p>
                 <p className="text-muted-foreground text-sm">Rejected</p>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* What stores told us in the "Two quick questions" section of their profile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="bg-card p-5 rounded-xl border border-border flex items-center gap-4">
+            <Smartphone className="w-6 h-6 text-primary shrink-0" />
+            <div>
+              <p className="font-semibold">{wantPrompt} of {all.length} stores want M-Pesa prompt payments</p>
+              <p className="text-sm text-muted-foreground">Shoppers confirm with their PIN instead of typing a code. Worth building once many stores ask.</p>
+            </div>
+          </div>
+          <div className="bg-card p-5 rounded-xl border border-border flex items-center gap-4">
+            <MessageCircle className="w-6 h-6 text-primary shrink-0" />
+            <div>
+              <p className="font-semibold">{onWhatsapp} of {all.length} stores take many orders on WhatsApp</p>
+              <p className="text-sm text-muted-foreground">These stores are shown the Imara Logic suggestion in their dashboard.</p>
             </div>
           </div>
         </div>
@@ -288,6 +326,8 @@ export default function AdminDashboard() {
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                       <span>📍 {[store.location, store.city].filter(Boolean).join(', ') || 'N/A'}</span>
                       {store.whatsapp && <span>💬 {store.whatsapp}</span>}
+                      {store.wants_mpesa_prompt && <span className="text-primary">Wants M-Pesa prompt</span>}
+                      {store.sells_on_whatsapp && <span className="text-primary">Sells on WhatsApp</span>}
                       <span>📞 {store.phone || 'N/A'}</span>
                       <span>✉️ {store.email || 'N/A'}</span>
                     </div>
