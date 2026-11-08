@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { Store, User, Mail, Lock, Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
+import { Store, User, Mail, Lock, Eye, EyeOff, ArrowLeft, Loader2, MailCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,7 +17,7 @@ const authSchema = z.object({
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading, signIn, signUp } = useAuth();
+  const { user, loading: authLoading, signIn, signUp, resendConfirmation } = useAuth();
   
   const isStoreMode = searchParams.get('mode') === 'store';
   // Only follow same-site paths so the redirect can't send people elsewhere.
@@ -28,6 +28,27 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '', name: '' });
   const [errors, setErrors] = useState<{ email?: string; password?: string; name?: string }>({});
+  // Set when an account exists but its email address has not been confirmed yet.
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+
+  const handleResend = async () => {
+    if (!pendingEmail) return;
+    setResending(true);
+    const { error } = await resendConfirmation(pendingEmail);
+    setResending(false);
+    if (error) {
+      toast({
+        title: "Couldn't send the email",
+        description: error.message.toLowerCase().includes('rate')
+          ? 'Too many emails sent. Please wait a few minutes and try again.'
+          : error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({ title: 'Email sent', description: `We sent a new confirmation link to ${pendingEmail}.` });
+    }
+  };
 
   // Redirect if already logged in
   useEffect(() => {
@@ -72,7 +93,9 @@ export default function Auth() {
       if (isLogin) {
         const { error } = await signIn(formData.email, formData.password);
         if (error) {
-          if (error.message.includes('Invalid login credentials')) {
+          if (error.message.toLowerCase().includes('email not confirmed')) {
+            setPendingEmail(formData.email.trim());
+          } else if (error.message.includes('Invalid login credentials')) {
             toast({ 
               title: "Login failed", 
               description: "Invalid email or password. Please try again.",
@@ -90,9 +113,9 @@ export default function Auth() {
           navigate(redirectTo, { replace: true });
         }
       } else {
-        const { error } = await signUp(formData.email, formData.password, formData.name);
-        if (error) {
-          if (error.message.includes('already registered')) {
+        const { error, needsConfirmation, alreadyRegistered } = await signUp(formData.email.trim(), formData.password, formData.name.trim());
+        if (error || alreadyRegistered) {
+          if (alreadyRegistered || error?.message.includes('already registered')) {
             toast({ 
               title: "Account exists", 
               description: "This email is already registered. Please sign in instead.",
@@ -102,12 +125,14 @@ export default function Auth() {
           } else {
             toast({ 
               title: "Sign up failed", 
-              description: error.message,
+              description: error!.message,
               variant: "destructive" 
             });
           }
+        } else if (needsConfirmation) {
+          setPendingEmail(formData.email.trim());
         } else {
-          toast({ title: "Account created!", description: "Welcome to Clotz Hub! If we sent you a confirmation email, open it to finish signing up." });
+          toast({ title: "Account created!", description: "Welcome to Clotz Hub!" });
           navigate(redirectTo, { replace: true });
         }
       }
@@ -184,6 +209,26 @@ export default function Auth() {
             </p>
           </div>
 
+          {pendingEmail ? (
+            <div className="rounded-xl border border-border bg-card p-6 text-center space-y-4">
+              <MailCheck className="w-12 h-12 mx-auto text-primary" />
+              <div>
+                <h2 className="text-xl font-semibold mb-1">Confirm your email</h2>
+                <p className="text-sm text-muted-foreground">
+                  We sent a link to <span className="font-medium text-foreground">{pendingEmail}</span>. Open it to activate your account, then sign in.
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground">Can't find it? Check your spam or promotions folder. Each link works only once.</p>
+              <Button variant="gold" className="w-full" onClick={handleResend} disabled={resending}>
+                {resending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                Send a new link
+              </Button>
+              <Button variant="ghost" className="w-full" onClick={() => { setPendingEmail(null); setIsLogin(true); }}>
+                Back to sign in
+              </Button>
+            </div>
+          ) : (
+          <>
           <div className="flex gap-2 p-1 bg-secondary rounded-lg mb-8">
             <button 
               onClick={() => setIsLogin(true)} 
@@ -271,6 +316,8 @@ export default function Auth() {
               )}
             </Button>
           </form>
+          </>
+          )}
 
         </div>
       </div>

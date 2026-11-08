@@ -1,13 +1,35 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+
+const confirmRedirectUrl = () => `${window.location.origin}/auth`;
+
+// Supabase sends people back with #error=...&error_code=... when an email link is
+// used up or expired. Turn that into a readable message and tidy the address bar.
+function reportAuthLinkError() {
+  const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+  if (!hash.includes('error')) return;
+  const params = new URLSearchParams(hash);
+  const code = params.get('error_code');
+  if (!code && !params.get('error')) return;
+  window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  toast({
+    title: code === 'otp_expired' ? 'That email link has expired' : 'That email link did not work',
+    description: code === 'otp_expired'
+      ? 'Links work once and expire after a while. Sign in with your email and password, and we will offer to send a new one.'
+      : params.get('error_description') ?? 'Please try again.',
+    variant: 'destructive',
+  });
+}
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null; needsConfirmation: boolean; alreadyRegistered: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  resendConfirmation: (email: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -19,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    reportAuthLinkError();
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -39,19 +62,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName,
-        },
+        emailRedirectTo: confirmRedirectUrl(),
+        data: { full_name: fullName },
       },
     });
-    
+    // With email protection on, an already-confirmed address comes back with no identities.
+    const alreadyRegistered = !error && !!data.user && (data.user.identities?.length ?? 0) === 0;
+    return { error: error as Error | null, needsConfirmation: !error && !data.session && !alreadyRegistered, alreadyRegistered };
+  };
+
+  const resendConfirmation = async (email: string) => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: confirmRedirectUrl() },
+    });
     return { error: error as Error | null };
   };
 
@@ -75,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading,
       signUp,
       signIn,
+      resendConfirmation,
       signOut,
     }}>
       {children}
