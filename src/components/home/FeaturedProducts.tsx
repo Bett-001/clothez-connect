@@ -1,11 +1,16 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { mockProducts } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
-import { ProductCard } from '@/components/products/ProductCard';
+import { ProductCard, ProductGridSkeleton } from '@/components/products/ProductCard';
+import { useProducts } from '@/hooks/useMarketplace';
 
 export function FeaturedProducts() {
-  const featuredProducts = mockProducts.slice(0, 4);
+  const featured = useProducts({ featured: true, inStockOnly: true, limit: 8 });
+  const latest = useProducts({ inStockOnly: true, limit: 8 });
+  const products = featured.data?.length ? featured.data : latest.data ?? [];
+  const isLoading = featured.isLoading || (!featured.data?.length && latest.isLoading);
+
+  if (!isLoading && products.length === 0) return null;
 
   return (
     <section className="py-16 md:py-24 bg-background">
@@ -13,11 +18,9 @@ export function FeaturedProducts() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-12">
           <div>
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-2">
-              Trending Products
+              {featured.data?.length ? 'Trending Now' : 'New Arrivals'}
             </h2>
-            <p className="text-muted-foreground">
-              Handpicked favorites from our verified stores
-            </p>
+            <p className="text-muted-foreground">Fresh picks from stores across the marketplace</p>
           </div>
           <Link to="/products">
             <Button variant="outline">
@@ -26,12 +29,13 @@ export function FeaturedProducts() {
             </Button>
           </Link>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
-          ))}
-        </div>
+        {isLoading ? (
+          <ProductGridSkeleton count={4} />
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {products.map((product, i) => <ProductCard key={product.id} product={product} index={i} />)}
+          </div>
+        )}
       </div>
     </section>
   );

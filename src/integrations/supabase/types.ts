@@ -14,8 +14,143 @@ export type Database = {
   }
   public: {
     Tables: {
+      order_items: {
+        Row: {
+          color: string | null
+          id: string
+          line_total: number
+          order_id: string
+          product_id: string | null
+          product_image: string | null
+          product_name: string
+          quantity: number
+          size: string | null
+          unit_price: number
+        }
+        Insert: {
+          color?: string | null
+          id?: string
+          line_total: number
+          order_id: string
+          product_id?: string | null
+          product_image?: string | null
+          product_name: string
+          quantity: number
+          size?: string | null
+          unit_price: number
+        }
+        Update: {
+          color?: string | null
+          id?: string
+          line_total?: number
+          order_id?: string
+          product_id?: string | null
+          product_image?: string | null
+          product_name?: string
+          quantity?: number
+          size?: string | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_email: string | null
+          customer_id: string
+          customer_name: string
+          customer_phone: string
+          delivery_address: string | null
+          delivery_city: string | null
+          delivery_fee: number
+          fulfillment_method: Database["public"]["Enums"]["fulfillment_method"]
+          id: string
+          notes: string | null
+          order_number: string
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_reference: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          status: Database["public"]["Enums"]["order_status"]
+          store_id: string
+          store_notes: string | null
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string | null
+          customer_id: string
+          customer_name: string
+          customer_phone: string
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_fee?: number
+          fulfillment_method?: Database["public"]["Enums"]["fulfillment_method"]
+          id?: string
+          notes?: string | null
+          order_number?: string
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_reference?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          status?: Database["public"]["Enums"]["order_status"]
+          store_id: string
+          store_notes?: string | null
+          subtotal: number
+          total: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string
+          customer_name?: string
+          customer_phone?: string
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_fee?: number
+          fulfillment_method?: Database["public"]["Enums"]["fulfillment_method"]
+          id?: string
+          notes?: string | null
+          order_number?: string
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          payment_reference?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          status?: Database["public"]["Enums"]["order_status"]
+          store_id?: string
+          store_notes?: string | null
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
+          brand: string | null
           category: string
           colors: string[] | null
           created_at: string
@@ -25,14 +160,19 @@ export type Database = {
           image_url: string | null
           images: string[] | null
           in_stock: boolean
+          is_active: boolean
+          material: string | null
           name: string
           original_price: number | null
           price: number
+          product_type: string | null
           sizes: string[] | null
+          stock: number
           store_id: string
           updated_at: string
         }
         Insert: {
+          brand?: string | null
           category: string
           colors?: string[] | null
           created_at?: string
@@ -42,14 +182,19 @@ export type Database = {
           image_url?: string | null
           images?: string[] | null
           in_stock?: boolean
+          is_active?: boolean
+          material?: string | null
           name: string
           original_price?: number | null
           price: number
+          product_type?: string | null
           sizes?: string[] | null
+          stock?: number
           store_id: string
           updated_at?: string
         }
         Update: {
+          brand?: string | null
           category?: string
           colors?: string[] | null
           created_at?: string
@@ -59,10 +204,14 @@ export type Database = {
           image_url?: string | null
           images?: string[] | null
           in_stock?: boolean
+          is_active?: boolean
+          material?: string | null
           name?: string
           original_price?: number | null
           price?: number
+          product_type?: string | null
           sizes?: string[] | null
+          stock?: number
           store_id?: string
           updated_at?: string
         }
@@ -80,6 +229,8 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          default_address: string | null
+          default_city: string | null
           full_name: string | null
           id: string
           phone: string | null
@@ -89,6 +240,8 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          default_address?: string | null
+          default_city?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
@@ -98,6 +251,8 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          default_address?: string | null
+          default_city?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
@@ -106,51 +261,143 @@ export type Database = {
         }
         Relationships: []
       }
+      store_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          reviewer_name: string | null
+          store_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          reviewer_name?: string | null
+          store_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          reviewer_name?: string | null
+          store_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_reviews_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stores: {
         Row: {
+          accepts_cash: boolean
+          address: string | null
           banner_url: string | null
+          categories: string[]
+          city: string | null
           created_at: string
+          delivery_fee: number
           description: string | null
           email: string | null
+          free_delivery_threshold: number | null
           id: string
+          instagram: string | null
+          is_featured: boolean
           location: string | null
           logo_url: string | null
+          map_url: string | null
+          mpesa_account: string | null
+          mpesa_paybill: string | null
+          mpesa_till: string | null
           name: string
+          offers_delivery: boolean
+          offers_pickup: boolean
+          opening_hours: string | null
           owner_id: string
           phone: string | null
           rejection_reason: string | null
           status: Database["public"]["Enums"]["store_status"]
+          tagline: string | null
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
+          accepts_cash?: boolean
+          address?: string | null
           banner_url?: string | null
+          categories?: string[]
+          city?: string | null
           created_at?: string
+          delivery_fee?: number
           description?: string | null
           email?: string | null
+          free_delivery_threshold?: number | null
           id?: string
+          instagram?: string | null
+          is_featured?: boolean
           location?: string | null
           logo_url?: string | null
+          map_url?: string | null
+          mpesa_account?: string | null
+          mpesa_paybill?: string | null
+          mpesa_till?: string | null
           name: string
+          offers_delivery?: boolean
+          offers_pickup?: boolean
+          opening_hours?: string | null
           owner_id: string
           phone?: string | null
           rejection_reason?: string | null
           status?: Database["public"]["Enums"]["store_status"]
+          tagline?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
+          accepts_cash?: boolean
+          address?: string | null
           banner_url?: string | null
+          categories?: string[]
+          city?: string | null
           created_at?: string
+          delivery_fee?: number
           description?: string | null
           email?: string | null
+          free_delivery_threshold?: number | null
           id?: string
+          instagram?: string | null
+          is_featured?: boolean
           location?: string | null
           logo_url?: string | null
+          map_url?: string | null
+          mpesa_account?: string | null
+          mpesa_paybill?: string | null
+          mpesa_till?: string | null
           name?: string
+          offers_delivery?: boolean
+          offers_pickup?: boolean
+          opening_hours?: string | null
           owner_id?: string
           phone?: string | null
           rejection_reason?: string | null
           status?: Database["public"]["Enums"]["store_status"]
+          tagline?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -180,18 +427,42 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_order: {
+        Args: { _order_id: string }
+        Returns: undefined
+      }
       get_public_stores: {
         Args: never
         Returns: {
-          banner_url: string
+          accepts_cash: boolean
+          address: string | null
+          avg_rating: number | null
+          banner_url: string | null
+          categories: string[]
+          city: string | null
           created_at: string
-          description: string
+          delivery_fee: number
+          description: string | null
+          free_delivery_threshold: number | null
           id: string
-          location: string
-          logo_url: string
+          instagram: string | null
+          is_featured: boolean
+          location: string | null
+          logo_url: string | null
+          map_url: string | null
+          mpesa_account: string | null
+          mpesa_paybill: string | null
+          mpesa_till: string | null
           name: string
+          offers_delivery: boolean
+          offers_pickup: boolean
+          opening_hours: string | null
+          product_count: number
+          review_count: number
           status: Database["public"]["Enums"]["store_status"]
+          tagline: string | null
           updated_at: string
+          whatsapp: string | null
         }[]
       }
       has_role: {
@@ -201,9 +472,42 @@ export type Database = {
         }
         Returns: boolean
       }
+      place_orders: {
+        Args: {
+          _customer_email: string
+          _customer_name: string
+          _customer_phone: string
+          _delivery_address: string
+          _delivery_city: string
+          _fulfillment_method: Database["public"]["Enums"]["fulfillment_method"]
+          _items: Json
+          _notes: string
+          _payment_method: Database["public"]["Enums"]["payment_method"]
+        }
+        Returns: Database["public"]["Tables"]["orders"]["Row"][]
+      }
+      submit_payment_reference: {
+        Args: { _order_id: string; _reference: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "store_owner" | "user"
+      fulfillment_method: "delivery" | "pickup"
+      order_status:
+        | "pending"
+        | "confirmed"
+        | "processing"
+        | "shipped"
+        | "delivered"
+        | "cancelled"
+      payment_method: "mpesa" | "cash"
+      payment_status:
+        | "unpaid"
+        | "pending_verification"
+        | "paid"
+        | "failed"
+        | "refunded"
       store_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -333,6 +637,10 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "store_owner", "user"],
+      fulfillment_method: ["delivery", "pickup"],
+      order_status: ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"],
+      payment_method: ["mpesa", "cash"],
+      payment_status: ["unpaid", "pending_verification", "paid", "failed", "refunded"],
       store_status: ["pending", "approved", "rejected"],
     },
   },

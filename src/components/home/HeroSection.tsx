@@ -27,7 +27,7 @@ export function HeroSection() {
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            Discover verified clothing stores for gents, ladies, and kids. Shop with confidence from Kenya's most trusted fashion vendors.
+            Walk through verified clothing shops for men, women and kids. Pick the store you like, fill your cart and check out with M-Pesa or cash.
           </p>
 
           {/* CTA Buttons */}
@@ -38,7 +38,7 @@ export function HeroSection() {
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
-            <Link to="/auth?mode=store">
+            <Link to="/register-store">
               <Button variant="outline" size="xl">
                 Register Your Store
               </Button>
@@ -53,11 +53,11 @@ export function HeroSection() {
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <CreditCard className="w-5 h-5 text-primary" />
-              <span className="text-sm">Secure Payments</span>
+              <span className="text-sm">M-Pesa & Cash</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Truck className="w-5 h-5 text-primary" />
-              <span className="text-sm">Fast Delivery</span>
+              <span className="text-sm">Delivery or Pickup</span>
             </div>
           </div>
         </div>

@@ -20,6 +20,9 @@ export default function Auth() {
   const { user, loading: authLoading, signIn, signUp } = useAuth();
   
   const isStoreMode = searchParams.get('mode') === 'store';
+  // Only follow same-site paths so the redirect can't send people elsewhere.
+  const rawRedirect = searchParams.get('redirect') ?? '';
+  const redirectTo = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : isStoreMode ? '/register-store' : '/';
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,9 +32,9 @@ export default function Auth() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !authLoading) {
-      navigate('/');
+      navigate(redirectTo, { replace: true });
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, redirectTo]);
 
   const validateForm = () => {
     try {
@@ -84,7 +87,7 @@ export default function Auth() {
           }
         } else {
           toast({ title: "Welcome back!", description: "You have successfully signed in." });
-          navigate('/');
+          navigate(redirectTo, { replace: true });
         }
       } else {
         const { error } = await signUp(formData.email, formData.password, formData.name);
@@ -104,8 +107,8 @@ export default function Auth() {
             });
           }
         } else {
-          toast({ title: "Account created!", description: "Welcome to Clotz Hub!" });
-          navigate('/');
+          toast({ title: "Account created!", description: "Welcome to Clotz Hub! If we sent you a confirmation email, open it to finish signing up." });
+          navigate(redirectTo, { replace: true });
         }
       }
     } catch (err) {
@@ -269,11 +272,6 @@ export default function Auth() {
             </Button>
           </form>
 
-          {isStoreMode && !isLogin && (
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              By registering, you agree to pay a one-time $20 registration fee after approval.
-            </p>
-          )}
         </div>
       </div>
     </div>

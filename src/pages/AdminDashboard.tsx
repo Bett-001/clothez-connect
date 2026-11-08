@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, CheckCircle, XCircle, Clock, Loader2, AlertTriangle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Store, CheckCircle, XCircle, Clock, Loader2, AlertTriangle, Star } from 'lucide-react';
+import { categoryName } from '@/lib/marketplace';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
@@ -21,8 +23,13 @@ import { Textarea } from '@/components/ui/textarea';
 interface StoreApplication {
   id: string;
   name: string;
+  tagline: string | null;
   description: string | null;
   location: string | null;
+  city: string | null;
+  categories: string[];
+  whatsapp: string | null;
+  is_featured: boolean;
   phone: string | null;
   email: string | null;
   status: 'pending' | 'approved' | 'rejected';
@@ -118,6 +125,16 @@ export default function AdminDashboard() {
     setActionLoading(false);
   };
 
+  const toggleFeatured = async (store: StoreApplication) => {
+    const { error } = await supabase.from('stores').update({ is_featured: !store.is_featured }).eq('id', store.id);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: store.is_featured ? 'Removed from featured' : 'Store featured on the homepage' });
+      fetchStores();
+    }
+  };
+
   const handleReject = async () => {
     if (!selectedStore || !rejectionReason.trim()) return;
     
@@ -173,7 +190,7 @@ export default function AdminDashboard() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-24">
+      <div className="container mx-auto px-4 py-12">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold mb-2">Admin Dashboard</h1>
           <p className="text-muted-foreground">Manage store registrations and approvals</p>
@@ -263,9 +280,14 @@ export default function AdminDashboard() {
                         {store.status}
                       </span>
                     </div>
+                    {store.tagline && <p className="text-primary text-sm mb-1">{store.tagline}</p>}
                     <p className="text-muted-foreground text-sm mb-2">{store.description}</p>
+                    {store.categories?.length > 0 && (
+                      <p className="text-sm mb-2">Sells: {store.categories.map(categoryName).join(', ')}</p>
+                    )}
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                      <span>📍 {store.location || 'N/A'}</span>
+                      <span>📍 {[store.location, store.city].filter(Boolean).join(', ') || 'N/A'}</span>
+                      {store.whatsapp && <span>💬 {store.whatsapp}</span>}
                       <span>📞 {store.phone || 'N/A'}</span>
                       <span>✉️ {store.email || 'N/A'}</span>
                     </div>
@@ -282,6 +304,26 @@ export default function AdminDashboard() {
                     )}
                   </div>
 
+                  {store.status === 'approved' && (
+                    <div className="flex gap-2 flex-wrap">
+                      <Link to={`/store/${store.id}`}><Button variant="outline" size="sm">View</Button></Link>
+                      <Button variant={store.is_featured ? 'gold' : 'outline'} size="sm" onClick={() => toggleFeatured(store)}>
+                        <Star className="w-4 h-4 mr-1" />
+                        {store.is_featured ? 'Featured' : 'Feature'}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive"
+                        onClick={() => {
+                          setSelectedStore(store);
+                          setRejectDialogOpen(true);
+                        }}
+                      >
+                        Suspend
+                      </Button>
+                    </div>
+                  )}
                   {store.status === 'pending' && (
                     <div className="flex gap-2">
                       <Button
@@ -318,7 +360,7 @@ export default function AdminDashboard() {
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Store Application</DialogTitle>
+            <DialogTitle>{selectedStore?.status === 'approved' ? 'Suspend Store' : 'Reject Store Application'}</DialogTitle>
             <DialogDescription>
               Please provide a reason for rejecting "{selectedStore?.name}". This will be visible to the applicant.
             </DialogDescription>

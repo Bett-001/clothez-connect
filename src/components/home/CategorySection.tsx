@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { categories } from '@/data/mockData';
+import { CATEGORIES } from '@/lib/marketplace';
 
 export function CategorySection() {
   const categoryImages = {
@@ -16,12 +16,12 @@ export function CategorySection() {
             Shop by Category
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Find exactly what you're looking for. Browse our curated collections for everyone in the family.
+            Men, women and kids. Browse every store's collection in one place.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          {categories.map((category, index) => (
+          {CATEGORIES.map((category, index) => (
             <Link
               key={category.id}
               to={`/products?category=${category.id}`}
@@ -41,9 +41,10 @@ export function CategorySection() {
               {/* Content */}
               <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
                 <span className="text-4xl mb-2 block">{category.icon}</span>
-                <h3 className="font-display text-2xl md:text-3xl font-bold text-cream mb-2">
+                <h3 className="font-display text-2xl md:text-3xl font-bold text-cream mb-1">
                   {category.name}
                 </h3>
+                <p className="text-cream/70 text-sm mb-2">{category.blurb}</p>
                 <span className="inline-flex items-center gap-2 text-primary font-medium group-hover:gap-4 transition-all">
                   Browse Collection
                   <span className="text-lg">→</span>

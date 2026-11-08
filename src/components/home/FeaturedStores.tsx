@@ -1,20 +1,22 @@
 import { Link } from 'react-router-dom';
-import { Star, ArrowRight, MapPin } from 'lucide-react';
-import { mockStores } from '@/data/mockData';
+import { ArrowRight, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { StoreCard, StoreGridSkeleton } from '@/components/stores/StoreCard';
+import { usePublicStores } from '@/hooks/useMarketplace';
 
 export function FeaturedStores() {
+  const { data: stores, isLoading } = usePublicStores();
+  const featured = [...(stores ?? [])]
+    .sort((a, b) => Number(b.is_featured) - Number(a.is_featured) || b.created_at.localeCompare(a.created_at))
+    .slice(0, 6);
+
   return (
-    <section className="py-16 md:py-24 bg-card">
+    <section className="py-16 md:py-24 bg-card/40">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-12">
           <div>
-            <h2 className="font-display text-3xl md:text-4xl font-bold mb-2">
-              Featured Stores
-            </h2>
-            <p className="text-muted-foreground">
-              Discover top-rated vendors trusted by thousands of shoppers
-            </p>
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-2">Shop by Store</h2>
+            <p className="text-muted-foreground">Walk into any shop on Clotz Hub, each run by its own owner</p>
           </div>
           <Link to="/stores">
             <Button variant="outline">
@@ -24,69 +26,19 @@ export function FeaturedStores() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {mockStores.map((store, index) => (
-            <Link
-              key={store.id}
-              to={`/store/${store.id}`}
-              className="group bg-background rounded-2xl overflow-hidden border border-border hover:border-primary/50 transition-all hover-lift animate-slide-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              {/* Banner */}
-              <div className="relative h-32 overflow-hidden">
-                <img
-                  src={store.banner}
-                  alt={store.businessName}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-              </div>
-
-              {/* Logo */}
-              <div className="relative px-4 -mt-8">
-                <div className="w-16 h-16 rounded-xl overflow-hidden border-4 border-background shadow-lg">
-                  <img
-                    src={store.logo}
-                    alt={store.businessName}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-4 pt-2">
-                <h3 className="font-display text-lg font-semibold mb-1 group-hover:text-primary transition-colors">
-                  {store.businessName}
-                </h3>
-
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                  <MapPin className="w-3 h-3" />
-                  {store.address}
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-primary text-primary" />
-                    <span className="font-medium">{store.rating}</span>
-                    <span className="text-muted-foreground text-sm">
-                      ({store.reviewCount})
-                    </span>
-                  </div>
-                  <div className="flex gap-1">
-                    {store.categories.map(cat => (
-                      <span
-                        key={cat}
-                        className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs capitalize"
-                      >
-                        {cat}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {isLoading ? (
+          <StoreGridSkeleton count={3} />
+        ) : featured.length === 0 ? (
+          <div className="text-center py-12 bg-card rounded-2xl border border-border">
+            <Store className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+            <p className="text-muted-foreground mb-3">No stores are open yet.</p>
+            <Link to="/register-store" className="text-primary hover:underline">Open the first store →</Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featured.map((store, i) => <StoreCard key={store.id} store={store} index={i} />)}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Store, Mail, Phone, MapPin, Instagram, Twitter, Facebook } from 'lucide-react';
+import { Store, Mail, Phone, MapPin, Instagram } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -24,12 +24,6 @@ export function Footer() {
               <a href="https://www.instagram.com/clotzhub/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
             </div>
           </div>
 
@@ -37,11 +31,18 @@ export function Footer() {
           <div>
             <h3 className="font-display text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-3">
-              {['Browse Stores', 'All Products', 'Categories', 'Deals & Offers'].map(link => (
-                <li key={link}>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                    {link}
-                  </a>
+              {[
+                { to: '/stores', label: 'Browse Stores' },
+                { to: '/products', label: 'All Products' },
+                { to: '/products?category=gents', label: "Men's Clothing" },
+                { to: '/products?category=ladies', label: "Women's Clothing" },
+                { to: '/products?category=kids', label: "Kids' Clothing" },
+                { to: '/orders', label: 'My Orders' },
+              ].map(link => (
+                <li key={link.to}>
+                  <Link to={link.to} className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -51,11 +52,16 @@ export function Footer() {
           <div>
             <h3 className="font-display text-lg font-semibold mb-4">For Sellers</h3>
             <ul className="space-y-3">
-              {['Register Your Store', 'Seller Dashboard', 'Pricing Plans', 'Seller Guidelines'].map(link => (
-                <li key={link}>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                    {link}
-                  </a>
+              {[
+                { to: '/register-store', label: 'Register Your Store' },
+                { to: '/my-store', label: 'Seller Dashboard' },
+                { to: '/my-store?tab=orders', label: 'Manage Orders' },
+                { to: '/my-store?tab=products', label: 'Manage Products' },
+              ].map(link => (
+                <li key={link.to}>
+                  <Link to={link.to} className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -83,12 +89,8 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
-            © 2024 Clotz Hub. All rights reserved.
+            © {new Date().getFullYear()} Clotz Hub. All rights reserved.
           </p>
-          <div className="flex gap-6">
-            <a href="#" className="text-muted-foreground hover:text-primary text-sm">Privacy Policy</a>
-            <a href="#" className="text-muted-foreground hover:text-primary text-sm">Terms of Service</a>
-          </div>
         </div>
       </div>
     </footer>
