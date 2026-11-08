@@ -50,7 +50,9 @@ Find these under Project Settings, then API, in the Supabase dashboard.
 
 ### Database setup
 
-Run every file in `supabase/migrations` in filename order. Either paste each one into the Supabase SQL editor, or use the Supabase CLI:
+For a new, empty Supabase project, paste `supabase/full-setup.sql` into the SQL editor and run it. It contains every migration in order.
+
+Alternatively, run each file in `supabase/migrations` in filename order, or use the Supabase CLI:
 
 ```sh
 npx supabase link --project-ref YOUR-PROJECT-ID
