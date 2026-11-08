@@ -122,6 +122,17 @@ export function Header() {
               </Button>
             </Link>
 
+            {user && isAdmin && (
+              <Link to="/admin" className="hidden lg:block">
+                <Button variant={location.pathname === '/admin' ? 'gold' : 'outline'} size="sm"><ShieldCheck className="w-4 h-4" />Admin</Button>
+              </Link>
+            )}
+            {user && hasStore && (
+              <Link to="/my-store" className="hidden lg:block">
+                <Button variant={location.pathname === '/my-store' ? 'gold' : 'outline'} size="sm"><Store className="w-4 h-4" />My Store</Button>
+              </Link>
+            )}
+
             {loading ? (
               <Button variant="ghost" size="icon" disabled><Loader2 className="w-4 h-4 animate-spin" /></Button>
             ) : user ? (

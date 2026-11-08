@@ -1,41 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export type AppRole = 'admin' | 'store_owner' | 'user';
 
 export function useUserRole() {
-  const { user } = useAuth();
-  const [roles, setRoles] = useState<AppRole[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
 
-  useEffect(() => {
-    if (!user) {
-      setRoles([]);
-      setLoading(false);
-      return;
-    }
+  const { data: roles = [], isPending } = useQuery({
+    queryKey: ['user-roles', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('user_roles').select('role').eq('user_id', user!.id);
+      if (error) throw error;
+      return (data ?? []).map(r => r.role as AppRole);
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
-    const fetchRoles = async () => {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id);
+  // Still loading while auth is resolving, or while a signed-in user's roles are being fetched.
+  // (Treating that gap as "not admin" used to bounce admins away from /admin.)
+  const loading = authLoading || (!!user && isPending);
 
-      if (error) {
-        console.error('Error fetching roles:', error);
-        setRoles([]);
-      } else {
-        setRoles(data?.map(r => r.role as AppRole) || []);
-      }
-      setLoading(false);
-    };
-
-    fetchRoles();
-  }, [user]);
-
-  const isAdmin = roles.includes('admin');
-  const isStoreOwner = roles.includes('store_owner');
-
-  return { roles, isAdmin, isStoreOwner, loading };
+  return {
+    roles,
+    isAdmin: roles.includes('admin'),
+    isStoreOwner: roles.includes('store_owner'),
+    loading,
+  };
 }
